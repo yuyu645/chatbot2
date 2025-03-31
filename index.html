@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dr. Faustino - Chatbot</title>
+    <style>
+ /* Reset de estilos */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background-color: #f0f2f5;
+}
+
+.chat-container {
+    max-width: 100%;
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.chat-header {
+    background: linear-gradient(135deg, #6e48aa 0%, #9d50bb 100%);
+    color: white;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    min-height: 60px;
+    z-index: 10;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #fff;
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.header-title {
+    flex-grow: 1;
+}
+
+.header-title h1 {
+    font-size: 18px;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.status {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.chat-wrapper {
+    flex-grow: 1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-messages {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+.message {
+    max-width: 85%;
+    padding: 10px 15px;
+    border-radius: 18px;
+    animation: fadeIn 0.3s ease-in-out;
+    position: relative;
+    line-height: 1.5;
+    word-wrap: break-word;
+    font-size: 15px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.bot-message {
+    align-self: flex-start;
+    background-color: #f1f0f0;
+    border-bottom-left-radius: 5px;
+}
+
+.user-message {
+    align-self: flex-end;
+    background-color: #6e48aa;
+    color: white;
+    border-bottom-right-radius: 5px;
+}
+
+/* Estilos mejorados para quick-replies */
+.quick-replies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    padding: 10px;
+    width: 100%;
+}
+
+.quick-reply {
+    background-color: #6e48aa;
+    border: none;
+    color: white;
+    border-radius: 50px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-grow: 1;
+    text-align: center;
+    min-width: 120px;
+    max-width: 48%;
+}
+
+.quick-reply:hover, .quick-reply:active {
+    background-color: #9d50bb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.chat-input {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #e9e9e9;
+    background-color: white;
+    position: relative;
+    width: 100%;
+}
+
+.chat-input input {
+    flex-grow: 1;
+    border: none;
+    background-color: #f1f0f0;
+    border-radius: 20px;
+    padding: 10px 15px;
+    font-size: 14px;
+    outline: none;
+    min-width: 50px;
+}
+
+.send-button {
+    background-color: #6e48aa;
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-left: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    touch-action: manipulation;
+}
+
+.send-button:hover, .send-button:active {
+    background-color: #9d50bb;
+}
+
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="avatar">🧠</div>
+            <div class="header-title">
+                <h1>Dr. Faustino</h1>
+                <div class="status">Online</div>
+            </div>
+        </div>
+        
+        <div class="chat-wrapper">
+            <div class="chat-messages" id="chat-messages">
+                <!-- Messages will be added here -->
+            </div>
+            
+            <div class="typing-indicator" id="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            
+            <div class="quick-replies" id="quick-replies">
+                <button class="quick-reply">¿Qué es el dengue?</button>
+                <button class="quick-reply">Síntomas del dengue</button>
+                <button class="quick-reply">Prevención del dengue</button>
+                <button class="quick-reply">¿Cuándo consultar al médico?</button>
+                <button class="quick-reply">Tratamiento del dengue</button>
+                <button class="quick-reply">Cuéntame un chiste</button>
+            </div>
+            
+            <div class="chat-input">
+                <input type="text" id="user-input" placeholder="Escribe un mensaje...">
+                <button class="send-button" id="send-button">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatMessages = document.getElementById('chat-messages');
+    const userInput = document.getElementById('user-input');
+    const sendButton = document.getElementById('send-button');
+    const typingIndicator = document.getElementById('typing-indicator');
+    const quickReplies = document.querySelectorAll('.quick-reply');
+    
+    // Fix viewport height for mobile browsers
+    function setVH() {
+        let vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    
+    setVH();
+    window.addEventListener('resize', setVH);
+    
+    // Jokes collection
+    const jokes = [
+        "¿Por qué los médicos son tan malos jugando al escondite? Porque siempre pueden encontrar dónde duele.",
+        "Doctor, doctor, me duele aquí. ¡Pues no se toque ahí!",
+        "¿Cómo se llama el campeón de buceo japonés? Tokofondo.",
+        "¿Qué le dice un jardinero a otro? Nos vemos cuando podamos.",
+        "¿Sabes por qué no se puede discutir con un DJ? Porque siempre están cambiando de tema.",
+        "Mi médico me dijo que caminara 10 km al día. Ya estoy a 350 km de casa... ¡Mándame un Uber!"
+    ];
+    
+    // Focus on input when clicking anywhere in the body except buttons
+    document.body.addEventListener('click', function(e) {
+        if (!e.target.closest('button') && !e.target.closest('input')) {
+            userInput.focus();
+        }
+    });
+    
+    // Initial greeting
+    setTimeout(() => {
+        addBotMessage("¡Hola! Soy el Dr. Faustino, tu asistente virtual. Puedo brindarte información sobre el dengue y otros temas de salud. ¿En qué puedo ayudarte hoy?");
+    }, 500);
+    
+    // Quick reply buttons
+    quickReplies.forEach(button => {
+        button.addEventListener('click', function() {
+            const question = this.textContent;
+            addUserMessage(question);
+            processUserMessage(question);
+        });
+    });
+    
+    // Send button and Enter key
+    sendButton.addEventListener('click', sendMessage);
+    userInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+    
+    function sendMessage() {
+        const message = userInput.value.trim();
+        if (message) {
+            addUserMessage(message);
+            userInput.value = '';
+            processUserMessage(message);
+        }
+    }
+    
+    function addUserMessage(message) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', 'user-message');
+        messageElement.textContent = message;
+        chatMessages.appendChild(messageElement);
+        scrollToBottom();
+    }
+    
+    function addBotMessage(message) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', 'bot-message');
+        messageElement.textContent = message;
+        chatMessages.appendChild(messageElement);
+        scrollToBottom();
+    }
+    
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    function showTypingIndicator() {
+        typingIndicator.style.display = 'block';
+        scrollToBottom();
+    }
+    
+    function hideTypingIndicator() {
+        typingIndicator.style.display = 'none';
+    }
+    
+    function processUserMessage(message) {
+        showTypingIndicator();
+        userInput.focus();
+        
+        // Simulate thinking time
+        setTimeout(() => {
+            hideTypingIndicator();
+            
+            // Convert to lowercase for easier matching
+            const lowerMessage = message.toLowerCase();
+            
+            // Response logic
+            if (lowerMessage.includes('qué es el dengue') || lowerMessage.includes('que es el dengue')) {
+                addBotMessage("El dengue es una enfermedad viral transmitida por la picadura del mosquito Aedes aegypti. Es común en zonas tropicales y subtropicales. La infección causa síntomas gripales y en algunos casos puede provocar complicaciones potencialmente mortales llamadas dengue grave. Es importante saber que existen cuatro serotipos del virus del dengue, lo que significa que una persona puede infectarse hasta cuatro veces.");
+            } 
+            else if (lowerMessage.includes('síntomas del dengue') || lowerMessage.includes('sintomas del dengue')) {
+                addBotMessage("Los síntomas del dengue suelen aparecer entre 4 y 10 días después de la picadura del mosquito infectado. Los más comunes son:\n\n• Fiebre alta (40°C/104°F)\n• Dolor de cabeza intenso\n• Dolor detrás de los ojos\n• Dolores musculares y articulares\n• Náuseas y vómitos\n• Sarpullido que aparece 3-4 días después de la fiebre\n• Sangrado leve (encías, nariz)\n\nLos signos de alarma que requieren atención médica inmediata incluyen dolor abdominal intenso, vómitos persistentes, sangrado en mucosas, letargo o inquietud y agrandamiento del hígado.");
+            }
+            else if (lowerMessage.includes('prevención del dengue') || lowerMessage.includes('prevencion del dengue') || lowerMessage.includes('prevenir el dengue')) {
+                addBotMessage("Para prevenir el dengue es fundamental controlar al mosquito transmisor:\n\n• Elimina agua estancada donde se reproducen los mosquitos (floreros, neumáticos, botellas)\n• Cubre los recipientes de almacenamiento de agua\n• Usa mosquiteros en ventanas y puertas\n• Aplica repelente en la piel expuesta (con DEET, IR3535 o Icaridina)\n• Viste ropa de manga larga y pantalones largos\n• Usa mosquiteros en las camas, especialmente para niños, embarazadas y ancianos\n• Participa en las campañas comunitarias de limpieza\n\nRecuerda que el mosquito Aedes aegypti suele picar durante el día, con mayor actividad al amanecer y al atardecer.");
+            }
+            else if (lowerMessage.includes('cuándo consultar') || lowerMessage.includes('cuando consultar') || lowerMessage.includes('ir al médico') || lowerMessage.includes('ir al medico')) {
+                addBotMessage("Debes buscar atención médica inmediata si presentas estos signos de alarma:\n\n• Dolor abdominal intenso o persistente\n• Vómitos continuos\n• Sangrado de encías, nariz o en orina/heces\n• Vómitos con sangre o heces negras\n• Somnolencia o irritabilidad excesiva\n• Piel pálida, fría o húmeda\n• Dificultad para respirar\n• Disminución de la producción de orina\n\nEstos síntomas pueden indicar dengue grave, que es una emergencia médica con riesgo vital y requiere hospitalización inmediata.");
+            }
+            else if (lowerMessage.includes('tratamiento del dengue') || lowerMessage.includes('tratar el dengue')) {
+                addBotMessage("No existe un tratamiento específico para el dengue. El manejo se basa en aliviar los síntomas:\n\n• Reposo en cama\n• Beber abundantes líquidos para prevenir la deshidratación\n• Tomar paracetamol para la fiebre y el dolor (NO aspirina ni ibuprofeno ya que pueden aumentar el riesgo de sangrado)\n• Evitar medicamentos antiinflamatorios no esteroideos (AINEs)\n• Consulta al médico antes de tomar cualquier medicación\n\nEn casos de dengue grave, se requiere atención hospitalaria con reposición de líquidos intravenosos, monitoreo de signos vitales y, en ocasiones, transfusiones sanguíneas.");
+            }
+            // Nueva condición para tratamiento en niños
+            else if ((lowerMessage.includes('niños') || lowerMessage.includes('niño') || lowerMessage.includes('niña') || lowerMessage.includes('niñas') || lowerMessage.includes('bebé') || lowerMessage.includes('bebe') || lowerMessage.includes('infante') || lowerMessage.includes('pediatrico') || lowerMessage.includes('pediátrico')) && 
+                    (lowerMessage.includes('tratamiento') || lowerMessage.includes('tratar') || lowerMessage.includes('cuidar') || lowerMessage.includes('cuidado') || lowerMessage.includes('medicina') || lowerMessage.includes('medicamento') || lowerMessage.includes('fiebre'))) {
+                addBotMessage("El tratamiento del dengue en niños requiere especial atención y cuidado:\n\n• NUNCA administrar aspirina, ibuprofeno u otros antiinflamatorios no esteroideos\n• Usar solo paracetamol para la fiebre, en la dosis adecuada según peso y edad (consultar con pediatra)\n• Mantener una hidratación constante (agua, jugos naturales, suero oral)\n• Si el niño rechaza líquidos, ofrecer pequeñas cantidades frecuentemente\n• Vestir al niño con ropa ligera\n• Baños de esponja con agua tibia para bajar la fiebre\n• Monitorear la temperatura cada 4-6 horas\n• Estar atento a señales de alarma como somnolencia excesiva, llanto persistente, vómitos, dolor abdominal o sangrados\n\nACUDIR INMEDIATAMENTE al servicio de urgencias si presenta cualquier signo de alarma, especialmente deshidratación, letargo, rechazo de alimentos/líquidos por más de 6 horas, o fiebre que no cede con paracetamol.");
+            }
+            // Nueva condición para síntomas en niños
+            else if ((lowerMessage.includes('niños') || lowerMessage.includes('niño') || lowerMessage.includes('niña') || lowerMessage.includes('niñas') || lowerMessage.includes('bebé') || lowerMessage.includes('bebe')) && 
+                    (lowerMessage.includes('síntoma') || lowerMessage.includes('sintoma') || lowerMessage.includes('señal') || lowerMessage.includes('senal') || lowerMessage.includes('presenta'))) {
+                addBotMessage("Los síntomas del dengue en niños pueden ser diferentes a los de adultos. Debes estar atento a:\n\n• Fiebre alta de inicio súbito (puede ser el único síntoma en bebés)\n• Irritabilidad o llanto persistente\n• Somnolencia inusual o dificultad para despertar\n• Rechazo a alimentarse o beber líquidos\n• Vómitos o diarrea\n• Dolor abdominal (el niño puede tocarse el abdomen o encogerse)\n• Sarpullido (aparece 2-5 días después de la fiebre)\n• Sangrado nasal, encías, o pequeñas manchas rojas en la piel\n• Ojos rojos\n\nEn bebés y niños pequeños, la deshidratación puede ocurrir rápidamente. Signos de alarma incluyen: ojos hundidos, fontanela (mollera) hundida en bebés, poca producción de orina (pañales secos por más de 6 horas), boca y labios secos, y llanto sin lágrimas.");
+            }
+            // Nueva condición para prevención en niños
+            else if ((lowerMessage.includes('niños') || lowerMessage.includes('niño') || lowerMessage.includes('niña') || lowerMessage.includes('niñas') || lowerMessage.includes('bebé') || lowerMessage.includes('bebe')) && 
+                    (lowerMessage.includes('prevención') || lowerMessage.includes('prevencion') || lowerMessage.includes('prevenir') || lowerMessage.includes('proteger') || lowerMessage.includes('protección') || lowerMessage.includes('proteccion') || lowerMessage.includes('repelente'))) {
+                addBotMessage("Para proteger a los niños del dengue:\n\n• Usar mosquiteros en cunas y camas (incluso durante siestas diurnas)\n• Para niños mayores de 2 meses, aplicar repelentes con DEET (concentración menor al 10% para bebés y niños pequeños)\n• Aplicar repelente en tus manos y luego pasarlo a la piel del niño, evitando ojos, boca y manos\n• NO aplicar repelente en heridas o piel irritada\n• Vestir a los niños con ropa de manga larga y pantalones largos, preferiblemente de colores claros\n• Usar ropa tratada con permetrina para mayor protección\n• No usar repelentes combinados con protector solar\n• Eliminar agua estancada alrededor de áreas de juego\n• Mantener puertas y ventanas cerradas o con mosquiteros durante las horas de mayor actividad del mosquito\n\nRecuerda: los niños son más vulnerables al dengue grave, así que es crucial protegerlos adecuadamente.");
+            }
+            // Nueva condición para embarazadas con dengue
+            else if ((lowerMessage.includes('embarazo') || lowerMessage.includes('embarazada') || lowerMessage.includes('gestante') || lowerMessage.includes('gestación') || lowerMessage.includes('gestacion')) && 
+                    (lowerMessage.includes('dengue') || lowerMessage.includes('mosquito'))) {
+                addBotMessage("El dengue durante el embarazo requiere atención especial:\n\n• Las embarazadas tienen mayor riesgo de desarrollar dengue grave\n• Puede haber complicaciones como parto prematuro, bajo peso al nacer o hemorragias durante el parto\n• La fiebre elevada en el primer trimestre puede aumentar el riesgo de malformaciones\n• Se recomienda acudir INMEDIATAMENTE al médico ante cualquier síntoma de dengue\n• El tratamiento debe ser supervisado por un obstetra y un especialista en enfermedades infecciosas\n• Para prevención: usar mosquiteros, repelentes aprobados para embarazadas (DEET, IR3535 o Icaridina en concentraciones adecuadas), ropa protectora y evitar zonas de alto riesgo\n\nSi estás embarazada y vives en zona endémica de dengue, debes mencionarlo en todas tus consultas prenatales para un monitoreo adecuado.");
+            }
+            else if (lowerMessage.includes('chiste')) {
+                const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
+                addBotMessage(randomJoke);
+            }
+            else if (lowerMessage.includes('quién eres') || lowerMessage.includes('quien eres')) {
+                addBotMessage("Soy el Dr. Faustino, un asistente virtual creado para brindarte información sobre temas de salud, particularmente sobre el dengue. Aunque no soy un médico real, puedo ayudarte con información general y recomendaciones básicas. Recuerda que siempre debes consultar a un profesional de la salud para diagnósticos y tratamientos específicos.");
+            }
+            else if (lowerMessage.includes('hola') || lowerMessage.includes('saludos') || lowerMessage.includes('buenos días') || lowerMessage.includes('buenas tardes')) {
+                addBotMessage("¡Hola! Es un placer conversar contigo. Estoy aquí para brindarte información sobre el dengue y responder tus dudas sobre este tema. ¿En qué puedo ayudarte hoy?");
+            }
+            else if (lowerMessage.includes('gracias') || lowerMessage.includes('thank')) {
+                addBotMessage("¡De nada! Estoy aquí para ayudarte con información sobre el dengue y otros temas de salud. Si tienes más preguntas, no dudes en consultarme.");
+            }
+            else if (lowerMessage.includes('adios') || lowerMessage.includes('adiós') || lowerMessage.includes('hasta luego') || lowerMessage.includes('bye')) {
+                addBotMessage("¡Hasta pronto! Recuerda seguir las medidas de prevención contra el dengue. Cuídate mucho y vuelve cuando necesites más información.");
+            }
+            else if (lowerMessage.includes('mosquito') || lowerMessage.includes('aedes')) {
+                addBotMessage("El dengue es transmitido por el mosquito Aedes aegypti, que se caracteriza por tener patas con rayas blancas y una marca en forma de lira en el tórax. Se reproduce en agua limpia estancada y suele picar durante el día, especialmente al amanecer y al atardecer. Un solo mosquito infectado puede transmitir el virus a varias personas.");
+            }
+            else if (lowerMessage.includes('cuánto dura el dengue') || lowerMessage.includes('cuanto dura el dengue') || lowerMessage.includes('duración del dengue') || lowerMessage.includes('duracion del dengue')) {
+                addBotMessage("El dengue suele durar entre 7 y 10 días en la mayoría de los casos. La fiebre alta generalmente dura entre 2 y 7 días, seguida de una fase de recuperación. Sin embargo, algunas personas pueden sentirse débiles o fatigadas durante varias semanas después de la enfermedad.");
+            }
+            else if (lowerMessage.includes('temporada de dengue') || lowerMessage.includes('época de dengue') || lowerMessage.includes('epoca de dengue')) {
+                addBotMessage("La temporada de dengue coincide con las épocas de lluvias, ya que el mosquito Aedes aegypti se reproduce en aguas estancadas. En muchos países tropicales, esto ocurre en los meses de verano y otoño.");
+            }
+            else if (lowerMessage.includes('el dengue tiene vacuna') || lowerMessage.includes('vacuna contra el dengue') || lowerMessage.includes('vacunación dengue')) {
+                addBotMessage("Sí, existen vacunas contra el dengue, como Dengvaxia y Qdenga. Sin embargo, no están disponibles en todos los países y su uso está recomendado solo para personas que ya han tenido dengue previamente. Consulta con un médico si deseas más información sobre la vacunación contra el dengue.");
+            }
+            else if (lowerMessage.includes('el dengue se contagia') || lowerMessage.includes('contagio de dengue') || lowerMessage.includes('dengue persona a persona')) {
+                addBotMessage("No, el dengue no se transmite directamente de persona a persona. Solo se transmite a través de la picadura del mosquito Aedes aegypti infectado.");
+            }
+            else if (lowerMessage.includes('cómo se detecta el dengue') || lowerMessage.includes('como se detecta el dengue') || lowerMessage.includes('diagnóstico del dengue') || lowerMessage.includes('diagnostico del dengue') || lowerMessage.includes('prueba para dengue')) {
+                addBotMessage("El diagnóstico del dengue se hace mediante síntomas clínicos y pruebas de laboratorio como:\n\n• Prueba rápida de antígeno NS1 (útil en los primeros días)\n• Prueba de anticuerpos IgM e IgG (detecta infección reciente o pasada)\n• Hemograma para ver niveles de plaquetas y glóbulos blancos\n\nSi sospechas dengue, acude a un centro de salud para una evaluación médica.");
+            }
+            else if (lowerMessage.includes('el dengue puede ser mortal') || lowerMessage.includes('dengue mortal') || lowerMessage.includes('dengue grave')) {
+                addBotMessage("Sí, en algunos casos el dengue puede volverse grave y causar complicaciones mortales. El dengue grave puede provocar hemorragias internas, insuficiencia orgánica y shock. Es importante buscar atención médica si se presentan signos de alarma como dolor abdominal intenso, vómitos persistentes o sangrado.");
+            }
+            else if (lowerMessage.includes('el dengue se contagia') || lowerMessage.includes('contagio de dengue') || lowerMessage.includes('dengue persona a persona')) {
+                addBotMessage("No, el dengue no se transmite directamente de persona a persona. Solo se transmite a través de la picadura del mosquito Aedes aegypti infectado.");
+            }
+            else if (lowerMessage.includes('cómo se detecta el dengue') || lowerMessage.includes('como se detecta el dengue') || lowerMessage.includes('diagnóstico del dengue') || lowerMessage.includes('diagnostico del dengue') || lowerMessage.includes('prueba para dengue')) {
+                addBotMessage("El diagnóstico del dengue se hace mediante síntomas clínicos y pruebas de laboratorio como:\n\n• Prueba rápida de antígeno NS1 (útil en los primeros días)\n• Prueba de anticuerpos IgM e IgG (detecta infección reciente o pasada)\n• Hemograma para ver niveles de plaquetas y glóbulos blancos\n\nSi sospechas dengue, acude a un centro de salud para una evaluación médica.");
+            }
+
+
+            else {
+                // Generic responses for other queries
+                const genericResponses = [
+                    "Interesante pregunta. Aunque mi especialidad es el dengue, déjame pensar en eso...",
+                    "Hmm, no estoy seguro de entender completamente. ¿Podrías reformular tu pregunta? Puedes usar los botones de abajo para preguntar sobre el dengue.",
+                    "Esa es una buena pregunta. ¿Te gustaría información más específica sobre algún aspecto del dengue?",
+                    "Entiendo lo que preguntas. Si necesitas información sobre el dengue, puedes usar los botones de preguntas rápidas.",
+                    "Gracias por tu pregunta. Si tienes dudas sobre el dengue, sus síntomas o prevención, puedo ayudarte con eso en detalle."
+                ];
+                
+                const randomResponse = genericResponses[Math.floor(Math.random() * genericResponses.length)];
+                addBotMessage(randomResponse);
+                
+                // 25% chance of adding a prevention tip
+                if (Math.random() < 0.25) {
+                    setTimeout(() => {
+                        showTypingIndicator();
+                        setTimeout(() => {
+                            hideTypingIndicator();
+                            addBotMessage("Un consejo útil: La mejor forma de prevenir el dengue es eliminar los criaderos de mosquitos. Revisa tu casa regularmente y elimina cualquier recipiente con agua estancada.");
+                        }, 1000);
+                    }, 1000);
+                }
+            }
+        }, Math.random() * 1000 + 1000); // Random typing time between 1-2 seconds
+    }
+    
+    // Enable touch events properly on mobile
+    document.addEventListener('touchstart', function() {}, {passive: true});
+    
+});
+    </script>
+</body>
+</html>
